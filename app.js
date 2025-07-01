@@ -63,15 +63,74 @@ app.post('/webhook', async (req, res) => {
 
 // Handle text messages
 async function handleTextMessage(from, messageText) {
-  const lowerMessage = messageText.toLowerCase();
+  await sendInitialMessage(from);
+}
 
-  if (lowerMessage === 'menu') {
-    await sendListMessage(from);
-  } else if (lowerMessage === 'options') {
-    await sendButtonMessage(from);
-  } else {
-    await processMessage(messageText);
+async function sendNewPatientMessage(from) {
+  try {
+    const response = await axios.post(
+      `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`,
+      {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: to,
+        type: 'interactive',
+        interactive: {
+          type: 'button',
+          header: {
+            type: 'text',
+            text: 'Inicio'
+          },
+          body: {
+            text: 'Como te puedo ayudar hoy?'
+          },
+          footer: {
+            text: 'Elija una opción a continuación'
+          },
+          action: {
+            buttons: [
+              {
+                type: 'reply',
+                reply: {
+                  id: 'prestaciones',
+                  title: 'Consulta de prestaciones'
+                }
+              },
+              {
+                type: 'reply',
+                reply: {
+                  id: 'profesionales',
+                  title: 'Listado de profesionales'
+                }
+              },
+              {
+                type: 'reply',
+                reply: {
+                  id: 'horarios',
+                  title: 'Horarios de atención'
+                }
+              },
+            ]
+          }
+        }
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log('Button message sent successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error sending button message:', error.response?.data || error);
+    throw error;
   }
+}
+
+async function sendExistingPatientMessage(from) {
+  await sendWhatsAppMessage(from, 'Como te puedo ayudar hoy?');
 }
 
 // Handle interactive responses
@@ -95,19 +154,24 @@ async function handleInteractiveResponse(from, interactive) {
         break;
     }
   } else if (interactive.type === 'button_reply') {
-    const selectedButton = interactive.button_reply.title;
-    response = `You pressed: ${selectedButton}. `;
+    const selectedButton = interactive.button_reply.id;
     
     // Handle button selections
     switch(selectedButton) {
-      case 'Yes':
-        response += 'Great! How can I help you today?';
+      case 'nuevo':
+        await sendNewPatientMessage(from);
         break;
-      case 'No':
-        response += 'No problem. Let me know if you need anything later!';
+      case 'existente':
+        await sendExistingPatientMessage(from);
         break;
-      case 'Maybe':
-        response += 'Take your time to decide. I\'ll be here!';
+      case 'prestaciones':
+        await sendWhatsAppMessage(from, 'Kinesiología, Fonoaudiología, Psicología, Neuropsicología, Neuropsicopedagogía')
+        break;
+      case 'profesionales':
+        await sendWhatsAppMessage(from, 'Dr Este, Dr Aquel')
+        break;
+      case 'horarios':
+        await sendWhatsAppMessage(from, 'Lunes a Viernes de 8:00 a 17:00')
         break;
     }
   }
@@ -185,7 +249,7 @@ async function sendListMessage(to) {
 }
 
 // Send a button message
-async function sendButtonMessage(to) {
+async function sendInitialMessage(to) {
   try {
     const response = await axios.post(
       `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`,
@@ -198,35 +262,28 @@ async function sendButtonMessage(to) {
           type: 'button',
           header: {
             type: 'text',
-            text: 'Quick Response'
+            text: 'Inicio'
           },
           body: {
-            text: 'Would you like to proceed?'
+            text: 'Hola! Soy Pilarica, el chat bot del Instituto de Neurorehabilitacion Pilar Pacheco. Antes de continuar, que tipo de paciente sos?'
           },
           footer: {
-            text: 'Choose an option below'
+            text: 'Elija una opción a continuación'
           },
           action: {
             buttons: [
               {
                 type: 'reply',
                 reply: {
-                  id: 'yes',
-                  title: 'Yes'
+                  id: 'nuevo',
+                  title: 'Paciente nuevo'
                 }
               },
               {
                 type: 'reply',
                 reply: {
-                  id: 'no',
-                  title: 'No'
-                }
-              },
-              {
-                type: 'reply',
-                reply: {
-                  id: 'maybe',
-                  title: 'Maybe'
+                  id: 'existente',
+                  title: 'Paciente existente'
                 }
               }
             ]
@@ -250,17 +307,6 @@ async function sendButtonMessage(to) {
 
 // Function to process incoming messages
 async function processMessage(message) {
-  // Convert message to lowercase for easier matching
-  const lowerMessage = message.toLowerCase();
-
-  // Basic command handling
-  if (lowerMessage.includes('hello')) {
-    return 'Hello! How can I help you today?';
-  } else if (lowerMessage.includes('help')) {
-    return 'Available commands:\n- hello: Get a greeting\n- help: Show this message\n- time: Get current time';
-  } else if (lowerMessage.includes('time')) {
-    return `Current time is: ${new Date().toLocaleString()}`;
-  }
 
   // Default response
   return 'I received your message. Type "help" to see available commands.';
