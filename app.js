@@ -187,32 +187,32 @@ async function sendExistingPatientMessage(from) {
 
 // Handle interactive responses
 async function handleInteractiveResponse(from, interactive) {
-  let response = '';
-  
-if (interactive.type === 'button_reply') {
-    const selectedButton = interactive.button_reply.id;
-    
-    // Handle button selections
-    switch(selectedButton) {
-      case 'nuevo':
-        await sendNewPatientMessage(from);
-        break;
-      case 'existente':
-        await sendExistingPatientMessage(from);
-        break;
-      case 'prestaciones':
-        await sendWhatsAppMessage(from, 'Kinesiología, Fonoaudiología, Psicología, Neuropsicología, Neuropsicopedagogía')
-        break;
-      case 'profesionales':
-        await sendWhatsAppMessage(from, 'Dr Este, Dr Aquel')
-        break;
-      case 'horarios':
-        await sendWhatsAppMessage(from, 'Lunes a Viernes de 8:00 a 17:00')
-        break;
+  console.log('Interactive response received');
+  console.log(interactive.type);
+  console.log(interactive.button_reply.id);
+  if (interactive.type === 'button') {
+      const selectedButton = interactive.button_reply.id;
+      console.log(selectedButton);
+      
+      // Handle button selections
+      switch(selectedButton) {
+        case 'nuevo':
+          await sendNewPatientMessage(from);
+          break;
+        case 'existente':
+          await sendExistingPatientMessage(from);
+          break;
+        case 'prestaciones':
+          await sendWhatsAppMessage(from, 'Kinesiología, Fonoaudiología, Psicología, Neuropsicología, Neuropsicopedagogía')
+          break;
+        case 'profesionales':
+          await sendWhatsAppMessage(from, 'Dr Este, Dr Aquel')
+          break;
+        case 'horarios':
+          await sendWhatsAppMessage(from, 'Lunes a Viernes de 8:00 a 17:00')
+          break;
+      }
     }
-  }
-
-  await sendWhatsAppMessage(from, response);
 }
 
 // Function to send messages via WhatsApp API
