@@ -60,7 +60,7 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
-// Send a button message
+// Send initial button message
 async function sendInitialMessage(to) {
   try {
     const response = await axios.post(
@@ -117,7 +117,6 @@ async function sendInitialMessage(to) {
   }
 }
 
-
 async function sendNewPatientMessage(to) {
   try {
     const response = await axios.post(
@@ -161,7 +160,7 @@ async function sendNewPatientMessage(to) {
                   id: 'horarios',
                   title: 'Horarios de atención'
                 }
-              },
+              }
             ]
           }
         }
@@ -190,28 +189,28 @@ async function handleInteractiveResponse(from, interactive) {
   console.log('Interactive response received');
   console.log(interactive.type === 'button_reply');
   if (interactive.type === 'button_reply') {
-      const selectedButton = interactive.button_reply.id;
-      console.log(selectedButton);
-      
-      // Handle button selections
-      switch(selectedButton) {
-        case 'nuevo':
-          await sendNewPatientMessage(from);
-          break;
-        case 'existente':
-          await sendExistingPatientMessage(from);
-          break;
-        case 'prestaciones':
-          await sendWhatsAppMessage(from, 'Kinesiología, Fonoaudiología, Psicología, Neuropsicología, Neuropsicopedagogía')
-          break;
-        case 'profesionales':
-          await sendWhatsAppMessage(from, 'Dr Este, Dr Aquel')
-          break;
-        case 'horarios':
-          await sendWhatsAppMessage(from, 'Lunes a Viernes de 8:00 a 17:00')
-          break;
-      }
+    const selectedButton = interactive.button_reply.id;
+    console.log(selectedButton);
+    
+    // Handle button selections
+    switch(selectedButton) {
+      case 'nuevo':
+        await sendNewPatientMessage(from);
+        break;
+      case 'existente':
+        await sendExistingPatientMessage(from);
+        break;
+      case 'prestaciones':
+        await sendWhatsAppMessage(from, 'Kinesiología, Fonoaudiología, Psicología, Neuropsicología, Neuropsicopedagogía');
+        break;
+      case 'profesionales':
+        await sendWhatsAppMessage(from, 'Dr Este, Dr Aquel');
+        break;
+      case 'horarios':
+        await sendWhatsAppMessage(from, 'Lunes a Viernes de 8:00 a 17:00');
+        break;
     }
+  }
 }
 
 // Function to send messages via WhatsApp API
