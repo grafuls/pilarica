@@ -188,9 +188,8 @@ async function sendExistingPatientMessage(from) {
 // Handle interactive responses
 async function handleInteractiveResponse(from, interactive) {
   console.log('Interactive response received');
-  console.log(interactive.type);
-  console.log(interactive.button_reply.id);
-  if (interactive.type === 'button') {
+  console.log(interactive.type === 'button_reply');
+  if (interactive.type === 'button_reply') {
       const selectedButton = interactive.button_reply.id;
       console.log(selectedButton);
       
