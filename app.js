@@ -32,6 +32,8 @@ app.get('/webhook', (req, res) => {
 app.post('/webhook', async (req, res) => {
   try {
     const { body } = req;
+    console.log("Message received");
+    console.log(body);
 
     // Check if this is a WhatsApp message
     if (body.object && body.entry && 
