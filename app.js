@@ -66,7 +66,7 @@ async function handleTextMessage(from, messageText) {
   await sendInitialMessage(from);
 }
 
-async function sendNewPatientMessage(from) {
+async function sendNewPatientMessage(to) {
   try {
     const response = await axios.post(
       `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`,
